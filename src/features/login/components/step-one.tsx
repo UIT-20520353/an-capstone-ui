@@ -1,0 +1,84 @@
+import React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { LoginFormProps } from "@/models/forms/login";
+import FormField from "@/components/form/form-field";
+
+interface StepOneProps {
+  onChangeStep: (step: 1 | 2 | 3) => void;
+}
+
+const validateSchema = z.object({
+  userId: z.string().min(5, { message: "Min length of user id is 5" }),
+  password: z.string().min(5, { message: "Min length of password is 5" }),
+});
+
+const StepOne: React.FunctionComponent<StepOneProps> = ({ onChangeStep }) => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormProps>({
+    resolver: zodResolver(validateSchema),
+    mode: "onChange",
+  });
+
+  const onLogin = (data: LoginFormProps) => {
+    console.log(data);
+    onChangeStep(2);
+  };
+
+  return (
+    <form
+      onSubmit={handleSubmit(onLogin)}
+      className="w-[500px] p-4 bg-white rounded-md"
+    >
+      <FormField
+        label={"User ID"}
+        name={"userId"}
+        placeholder={"Please enter user id"}
+        errors={errors}
+        register={register}
+      />
+      <button
+        type="button"
+        className="text-sm font-medium text-red-600 underline border-0 outline-none"
+      >
+        Forgot your User ID?
+      </button>
+
+      <FormField
+        label={"Password"}
+        name={"password"}
+        placeholder={"Please enter password"}
+        errors={errors}
+        register={register}
+        className="mt-3"
+      />
+      <p className="mt-2 text-sm">
+        Enter your NAB Connect password, or the one-time password from your
+        mobile or physical token.
+      </p>
+      <button
+        type="button"
+        className="text-sm font-medium text-red-600 underline border-0 outline-none"
+      >
+        Forgot your password?
+      </button>
+
+      <div className="flex items-center gap-2 mt-5">
+        <input type="checkbox" id="remember" className="w-3 h-3" />
+        <label htmlFor="remember" className="text-sm cursor-pointer">
+          Remember my User ID
+        </label>
+      </div>
+
+      <button className="w-32 py-2 mt-5 font-bold text-white duration-300 rounded-md text-md bg-custom-red-1 hover:opacity-85">
+        Login
+      </button>
+    </form>
+  );
+};
+
+export default StepOne;

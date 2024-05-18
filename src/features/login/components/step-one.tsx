@@ -1,9 +1,19 @@
+import axiosClient from "@/api/axiosClient";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
+import FormField from "@/components/form/form-field";
+import useAccessToken from "@/hooks/useAccessToken";
+import useHandleResponseError from "@/hooks/useHandleResponseError";
+import { LoginFormProps } from "@/models/forms/login";
+import {
+  addLoading,
+  removeLoading,
+  selectIsLoading,
+} from "@/redux/global-slice";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "antd";
 import React from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { LoginFormProps } from "@/models/forms/login";
-import FormField from "@/components/form/form-field";
 
 interface StepOneProps {
   onChangeStep: (step: 1 | 2 | 3) => void;
@@ -15,6 +25,10 @@ const validateSchema = z.object({
 });
 
 const StepOne: React.FunctionComponent<StepOneProps> = ({ onChangeStep }) => {
+  const dispatch = useAppDispatch();
+  const isLoading = useAppSelector(selectIsLoading);
+  const { setAccessToken } = useAccessToken();
+  const handleResponseError = useHandleResponseError();
   const {
     register,
     handleSubmit,
@@ -25,8 +39,32 @@ const StepOne: React.FunctionComponent<StepOneProps> = ({ onChangeStep }) => {
   });
 
   const onLogin = (data: LoginFormProps) => {
-    console.log(data);
-    onChangeStep(2);
+    dispatch(addLoading());
+    axiosClient
+      .post(
+        "/api/authentication/signup.php",
+        {
+          username: data.userId,
+          password: data.password,
+        },
+        {
+          headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS",
+          },
+        }
+      )
+      .then((res) => {
+        setAccessToken(res.data.access_token);
+        onChangeStep(2);
+      })
+      .catch((e) => {
+        console.error(e);
+        handleResponseError("Đã xảy ra lỗi");
+      })
+      .finally(() => {
+        dispatch(removeLoading());
+      });
   };
 
   return (
@@ -55,6 +93,7 @@ const StepOne: React.FunctionComponent<StepOneProps> = ({ onChangeStep }) => {
         errors={errors}
         register={register}
         className="mt-3"
+        type="password"
       />
       <p className="mt-2 text-sm">
         Enter your NAB Connect password, or the one-time password from your
@@ -74,9 +113,14 @@ const StepOne: React.FunctionComponent<StepOneProps> = ({ onChangeStep }) => {
         </label>
       </div>
 
-      <button className="w-32 py-2 mt-5 font-bold text-white duration-300 rounded-md text-md bg-custom-red-1 hover:opacity-85">
+      <Button
+        type="primary"
+        className="flex items-center justify-center w-32 h-10 py-2 mt-5 font-bold text-white duration-300 rounded-md hover:!bg-custom-red-2 !bg-custom-red-1 text-md"
+        loading={!!isLoading}
+        htmlType="submit"
+      >
         Login
-      </button>
+      </Button>
     </form>
   );
 };

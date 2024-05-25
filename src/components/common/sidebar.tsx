@@ -11,8 +11,6 @@ interface MenuProps {
 const Sidebar: React.FunctionComponent<SidebarProps> = () => {
   const location = useLocation();
 
-  console.log(location.pathname);
-
   const menus = useMemo(
     (): MenuProps[] => [
       { label: "Getting started", to: "/" },

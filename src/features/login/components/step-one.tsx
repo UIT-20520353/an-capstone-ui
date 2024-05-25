@@ -27,7 +27,7 @@ const validateSchema = z.object({
 const StepOne: React.FunctionComponent<StepOneProps> = ({ onChangeStep }) => {
   const dispatch = useAppDispatch();
   const isLoading = useAppSelector(selectIsLoading);
-  const { setAccessToken } = useAccessToken();
+  const { setDataLogin } = useAccessToken();
   const handleResponseError = useHandleResponseError();
   const {
     register,
@@ -55,8 +55,14 @@ const StepOne: React.FunctionComponent<StepOneProps> = ({ onChangeStep }) => {
         }
       )
       .then((res) => {
-        setAccessToken(res.data.access_token);
-        onChangeStep(2);
+        if (res.data.error === -1) {
+          handleResponseError("Sai tên đăng nhập hoặc mật khẩu!");
+        }
+
+        if (res.data.access_token) {
+          setDataLogin(res.data.access_token);
+          onChangeStep(2);
+        }
       })
       .catch((e) => {
         console.error(e);

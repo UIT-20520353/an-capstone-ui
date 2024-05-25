@@ -1,43 +1,88 @@
-import React, { useMemo } from "react";
+import axiosClient from "@/api/axiosClient";
+import { useAppSelector } from "@/app/hooks";
+import SkeletonLoader from "@/components/common/skeleton-loader";
+import useHandleResponseError from "@/hooks/useHandleResponseError";
+import { IHomeLoadDetails } from "@/models/home-loan-details";
+import { selectAccessToken, selectUserDetail } from "@/redux/auth-slice";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { NumericFormat } from "react-number-format";
 import { Link } from "react-router-dom";
 
 interface HomeLoanDetailsProps {}
 
 interface InforProps {
   label: string;
-  dataIndex: string;
+  dataIndex: keyof IHomeLoadDetails;
 }
 
 const HomeLoanDetails: React.FunctionComponent<HomeLoanDetailsProps> = () => {
+  const accessToken = useAppSelector(selectAccessToken);
+  const userDetail = useAppSelector(selectUserDetail);
+  const handleResponseError = useHandleResponseError();
+
+  const [details, setDetails] = useState<IHomeLoadDetails | undefined>(
+    undefined
+  );
+
   const anotherInfors = useMemo(
     (): InforProps[] => [
       {
         label: "Product name",
-        dataIndex: "NAB Tailor home loan",
+        dataIndex: "productName",
       },
       {
         label: "Assurance attachment",
-        dataIndex: "No",
+        dataIndex: "AssuranceAttachment",
       },
       {
         label: "Rate type",
-        dataIndex: "Variable",
+        dataIndex: "RateType",
       },
       {
         label: "Interest rate per annum",
-        dataIndex: "2.09%",
+        dataIndex: "inrestRate",
       },
       {
         label: "Offset account number",
-        dataIndex: "9372018263",
+        dataIndex: "offsetAcc",
       },
       {
         label: "Loan purpose",
-        dataIndex: "Owner Occupied Principal Place of Residence ",
+        dataIndex: "loanPurpose",
       },
     ],
     []
   );
+
+  const fetchData = useCallback(() => {
+    axiosClient
+      .post(
+        "/api/homeloan/loandetails.php",
+        {
+          id: userDetail.customerId || "C01",
+        },
+        {
+          headers: {
+            "access-token": accessToken,
+          },
+        }
+      )
+      .then((res) => {
+        if (res.data.error === -1) {
+          handleResponseError("Xảy ra lỗi khi lấy thông tin");
+        } else {
+          setDetails(res.data);
+        }
+      })
+      .catch((e) => {
+        console.error(e);
+        handleResponseError("Xảy ra lỗi khi lấy thông tin");
+      });
+  }, [accessToken, handleResponseError, userDetail.customerId]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   return (
     <div className="flex flex-col items-start w-full gap-4 px-10 py-4">
@@ -46,9 +91,25 @@ const HomeLoanDetails: React.FunctionComponent<HomeLoanDetailsProps> = () => {
       <div className="flex flex-col items-start w-full gap-2">
         <p className="text-base font-semibold">Loan account number</p>
         <div className="w-full max-w-[60%] flex items-center h-16 border border-gray-500 rounded-xl px-4 justify-between">
-          <p className="text-base font-medium">9372018263-2024-BPB</p>
+          {details ? (
+            <p className="text-base font-medium">{details.loanAcc}</p>
+          ) : (
+            <SkeletonLoader />
+          )}
           <div className="flex flex-col items-end justify-between">
-            <p className="text-base font-bold">$300,000.01</p>
+            {details ? (
+              <p className="text-base font-bold">
+                <NumericFormat
+                  value={details.currentBalance}
+                  prefix="$"
+                  thousandSeparator=","
+                  displayType="text"
+                  className="text-base font-bold"
+                />
+              </p>
+            ) : (
+              <SkeletonLoader width={150} height={10} />
+            )}
             <p className="text-base">Current balance</p>
           </div>
         </div>
@@ -61,7 +122,11 @@ const HomeLoanDetails: React.FunctionComponent<HomeLoanDetailsProps> = () => {
             className="flex flex-col items-start col-span-1"
           >
             <p className="text-base font-semibold">{infor.label}</p>
-            <p className="text-base">{infor.dataIndex}</p>
+            {details ? (
+              <p className="text-base">{details[infor.dataIndex]}</p>
+            ) : (
+              <SkeletonLoader width={250} />
+            )}
           </div>
         ))}
       </div>

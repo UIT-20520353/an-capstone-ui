@@ -41,19 +41,10 @@ const StepOne: React.FunctionComponent<StepOneProps> = ({ onChangeStep }) => {
   const onLogin = (data: LoginFormProps) => {
     dispatch(addLoading());
     axiosClient
-      .post(
-        "/api/authentication/signup.php",
-        {
-          username: data.userId,
-          password: data.password,
-        },
-        {
-          headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "GET,PUT,POST,DELETE,PATCH,OPTIONS",
-          },
-        }
-      )
+      .post("/api/authentication/signup.php", {
+        username: data.userId,
+        password: data.password,
+      })
       .then((res) => {
         if (res.data.error === -1) {
           handleResponseError("Sai tên đăng nhập hoặc mật khẩu!");

@@ -1,57 +1,57 @@
-import axiosClient from "@/api/axiosClient";
-import { useAppSelector } from "@/app/hooks";
-import SkeletonLoader from "@/components/common/skeleton-loader";
-import useHandleResponseError from "@/hooks/useHandleResponseError";
-import { IBankerDetail } from "@/models/banker-detail";
-import { selectAccessToken, selectUserDetail } from "@/redux/auth-slice";
+// import axiosClient from "@/api/axiosClient";
+// import { useAppSelector } from "@/app/hooks";
+// import SkeletonLoader from "@/components/common/skeleton-loader";
+// import useHandleResponseError from "@/hooks/useHandleResponseError";
+// import { IBankerDetail } from "@/models/banker-detail";
+// import { selectAccessToken, selectUserDetail } from "@/redux/auth-slice";
 import { Button } from "antd";
 import clsx from "clsx";
-import React, { useCallback, useEffect, useState } from "react";
+import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 interface BankderDetailsProps {}
 
 const BankderDetails: React.FunctionComponent<BankderDetailsProps> = () => {
   const navigate = useNavigate();
-  const accessToken = useAppSelector(selectAccessToken);
-  const userDetail = useAppSelector(selectUserDetail);
-  const handleResponseError = useHandleResponseError();
+  // const accessToken = useAppSelector(selectAccessToken);
+  // const userDetail = useAppSelector(selectUserDetail);
+  // const handleResponseError = useHandleResponseError();
 
-  const [details, setDetails] = useState<IBankerDetail | undefined>(undefined);
+  // const [details, setDetails] = useState<IBankerDetail | undefined>(undefined);
 
-  const fetchData = useCallback(() => {
-    axiosClient
-      .post(
-        "/api/banker/details.php",
-        {
-          id: userDetail.customerId || "C01",
-        },
-        {
-          headers: {
-            "access-token": accessToken,
-          },
-        }
-      )
-      .then((res) => {
-        if (res.data.error === -1) {
-          handleResponseError("Xảy ra lỗi khi lấy thông tin");
-        } else {
-          setDetails(res.data);
-        }
-      })
-      .catch((e) => {
-        console.error(e);
-        handleResponseError("Xảy ra lỗi khi lấy thông tin");
-      });
-  }, [accessToken, handleResponseError, userDetail.customerId]);
+  // const fetchData = useCallback(() => {
+  //   axiosClient
+  //     .post(
+  //       "/api/banker/details.php",
+  //       {
+  //         id: userDetail.customerId || "C01",
+  //       },
+  //       {
+  //         headers: {
+  //           "access-token": accessToken,
+  //         },
+  //       }
+  //     )
+  //     .then((res) => {
+  //       if (res.data.error === -1) {
+  //         handleResponseError("Xảy ra lỗi khi lấy thông tin");
+  //       } else {
+  //         setDetails(res.data);
+  //       }
+  //     })
+  //     .catch((e) => {
+  //       console.error(e);
+  //       handleResponseError("Xảy ra lỗi khi lấy thông tin");
+  //     });
+  // }, [accessToken, handleResponseError, userDetail.customerId]);
 
   const onNext = () => {
     navigate("/home-loan-details");
   };
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  // useEffect(() => {
+  //   fetchData();
+  // }, [fetchData]);
 
   return (
     <div className="flex flex-col items-start w-full gap-5 px-10 py-4">
@@ -62,29 +62,32 @@ const BankderDetails: React.FunctionComponent<BankderDetailsProps> = () => {
         <div className="grid w-full grid-cols-2 gap-y-3">
           <div className="flex flex-col col-span-1 gap-2">
             <p className="text-base font-bold">Banker name</p>
-            {details ? (
+            {/* {details ? (
               <p className="text-base">{details.bankerName}</p>
             ) : (
               <SkeletonLoader />
-            )}
+            )} */}
+            <p className="text-base">Andie Chan</p>
           </div>
 
           <div className="flex flex-col col-span-1 gap-2">
             <p className="text-base font-bold">Banker email</p>
-            {details ? (
+            {/* {details ? (
               <p className="text-base text-red-500">{details.bankerEmail}</p>
             ) : (
               <SkeletonLoader width={300} />
-            )}
+            )} */}
+            <p className="text-base text-red-500">Andie.Tran@gmail.com</p>
           </div>
 
           <div className="flex flex-col col-span-1 gap-2">
             <p className="text-base font-bold">Banker area</p>
-            {details ? (
+            {/* {details ? (
               <p className="text-base">{details.bankerArea}</p>
             ) : (
               <SkeletonLoader width={180} />
-            )}
+            )} */}
+            <p className="text-base">Retail</p>
           </div>
         </div>
       </div>

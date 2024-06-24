@@ -1,9 +1,10 @@
 import axiosClient from "@/api/axiosClient";
-import { useAppSelector } from "@/app/hooks";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import SkeletonLoader from "@/components/common/skeleton-loader";
 import useHandleResponseError from "@/hooks/useHandleResponseError";
 import { IHomeLoadDetails } from "@/models/home-loan-details";
 import { selectAccessToken, selectUserDetail } from "@/redux/auth-slice";
+import { setHomeLoanDetails } from "@/redux/global-slice";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import { Link } from "react-router-dom";
@@ -16,6 +17,7 @@ interface InforProps {
 }
 
 const HomeLoanDetails: React.FunctionComponent<HomeLoanDetailsProps> = () => {
+  const dispatch = useAppDispatch();
   const accessToken = useAppSelector(selectAccessToken);
   const userDetail = useAppSelector(selectUserDetail);
   const handleResponseError = useHandleResponseError();
@@ -72,13 +74,14 @@ const HomeLoanDetails: React.FunctionComponent<HomeLoanDetailsProps> = () => {
           handleResponseError("Xảy ra lỗi khi lấy thông tin");
         } else {
           setDetails(res.data);
+          dispatch(setHomeLoanDetails(res.data));
         }
       })
       .catch((e) => {
         console.error(e);
         handleResponseError("Xảy ra lỗi khi lấy thông tin");
       });
-  }, [accessToken, handleResponseError, userDetail.customerId]);
+  }, [accessToken, handleResponseError, userDetail.customerId, dispatch]);
 
   useEffect(() => {
     fetchData();

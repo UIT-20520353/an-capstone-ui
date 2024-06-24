@@ -1,9 +1,14 @@
 import axiosClient from "@/api/axiosClient";
-import { useAppSelector } from "@/app/hooks";
+import { useAppDispatch, useAppSelector } from "@/app/hooks";
 import useHandleResponseError from "@/hooks/useHandleResponseError";
 import { ILoanChanges } from "@/models/loan-change";
 import { selectAccessToken } from "@/redux/auth-slice";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  onCheckboxChange,
+  selectCheckboxStates,
+  setCheckboxStates,
+} from "@/redux/global-slice";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 
 interface LoanChangesProps {}
@@ -15,17 +20,10 @@ interface CardProps {
 }
 
 const LoanChanges: React.FunctionComponent<LoanChangesProps> = () => {
+  const dispatch = useAppDispatch();
   const accessToken = useAppSelector(selectAccessToken);
   const handleResponseError = useHandleResponseError();
-
-  const [checkboxStates, setCheckboxStates] = useState<ILoanChanges>({
-    fix: 1,
-    cancel: 1,
-    reduce: 1,
-    "change io/pi": 1,
-    "loan split": 1,
-    "loan purpose": 1,
-  });
+  const checkboxStates = useAppSelector(selectCheckboxStates);
 
   const cards = useMemo(
     (): CardProps[] => [
@@ -84,15 +82,17 @@ const LoanChanges: React.FunctionComponent<LoanChangesProps> = () => {
         if (res.data.error === -1) {
           handleResponseError("Xảy ra lỗi khi lấy thông tin");
         } else {
-          setCheckboxStates(
-            res.data || {
-              fix: 1,
-              cancel: 1,
-              reduce: 1,
-              "change io/pi": 1,
-              "loan split": 1,
-              "loan purpose": 1,
-            }
+          dispatch(
+            setCheckboxStates(
+              res.data || {
+                fix: 1,
+                cancel: 1,
+                reduce: 1,
+                "change io/pi": 1,
+                "loan split": 1,
+                "loan purpose": 1,
+              }
+            )
           );
         }
       })
@@ -100,7 +100,7 @@ const LoanChanges: React.FunctionComponent<LoanChangesProps> = () => {
         console.error(e);
         handleResponseError("Xảy ra lỗi khi lấy thông tin");
       });
-  }, [accessToken, handleResponseError]);
+  }, [accessToken, handleResponseError, dispatch]);
 
   useEffect(() => {
     fetchData();
@@ -131,11 +131,12 @@ const LoanChanges: React.FunctionComponent<LoanChangesProps> = () => {
                   type="checkbox"
                   checked={!checkboxStates[card.key]}
                   onChange={(e) => {
-                    console.log(e);
-                    setCheckboxStates((prev) => ({
-                      ...prev,
-                      [card.key]: e.target.checked ? 0 : 1,
-                    }));
+                    dispatch(
+                      onCheckboxChange({
+                        key: card.key,
+                        value: e.target.checked ? 0 : 1,
+                      })
+                    );
                   }}
                 />
                 <span className="checkmark"></span>
@@ -154,7 +155,7 @@ const LoanChanges: React.FunctionComponent<LoanChangesProps> = () => {
         </Link>
 
         <Link
-          to="/"
+          to="/review"
           className="flex items-center justify-center w-32 h-10 py-2 mt-5 font-bold text-white duration-300 border-0 rounded-md outline-none hover:bg-custom-red-2 bg-custom-red-1 text-md"
         >
           Next

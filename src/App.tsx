@@ -4,6 +4,7 @@ import Dashboard from "@/features/dashboard";
 import HomeLoanDetails from "@/features/home-loan-details";
 import LoanChanges from "@/features/loan-changes";
 import LoginPage from "@/features/login";
+import Review from "@/features/review/review";
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 
@@ -17,6 +18,7 @@ const App: React.FunctionComponent<IAppProps> = () => {
         <Route path="banker-details" element={<BankderDetails />} />
         <Route path="home-loan-details" element={<HomeLoanDetails />} />
         <Route path="loan-changes" element={<LoanChanges />} />
+        <Route path="review" element={<Review />} />
         <Route index element={<Dashboard />} />
       </Route>
     </Routes>
